@@ -1,4 +1,4 @@
-package com.njackson;
+package com.njackson.gps;
 
 import android.content.Context;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.njackson;
+package com.njackson.gps;
 
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
@@ -17,6 +17,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import android.content.Intent;
+import com.njackson.Constants;
+import com.njackson.MainActivity;
+import com.njackson.virtualpebble.PebbleService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -354,8 +357,8 @@ public class LiveTracking {
 
     private void sendPebbleEvent(PebbleDictionary dic) {
         String jsonData = dic.toJsonString();
-        Intent dataIntent = new Intent(VirtualPebbleService.PEBBLE_DATA_EVENT);
-        dataIntent.putExtra(VirtualPebbleService.INTENT_EXTRA_NAME,jsonData);
+        Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
+        dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
         _context.sendBroadcast(dataIntent);
     }
 

@@ -6,6 +6,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import com.njackson.gps.OruxMaps;
 
 public class PebbleDataReceiver extends com.getpebble.android.kit.PebbleKit.PebbleDataReceiver {
 	

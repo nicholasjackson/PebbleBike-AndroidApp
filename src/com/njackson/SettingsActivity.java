@@ -20,6 +20,8 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+import com.njackson.gps.GPSService;
+import com.njackson.hr.HRMScanActivity;
 
 /**
  * Created with IntelliJ IDEA.

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.njackson.gps.GPSService;
 import com.njackson.util.AltitudeGraphReduce;
 
 import java.util.ArrayList;

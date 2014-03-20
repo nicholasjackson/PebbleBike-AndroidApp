@@ -26,7 +26,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.DetectedActivity;
 
+import com.njackson.gps.GPSService;
 import com.njackson.util.AltitudeGraphReduce;
+import com.njackson.virtualpebble.PebbleService;
 import de.cketti.library.changelog.ChangeLog;
 
 import java.util.Calendar;
@@ -133,7 +135,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             int prev_refresh_interval = _refresh_interval;
             _refresh_interval = Integer.valueOf(prefs.getString("REFRESH_INTERVAL", "1000"));
             if (prev_refresh_interval != _refresh_interval) {
-                GPSService.changeRefreshInterval(_refresh_interval);
+                //GPSService.changeRefreshInterval(_refresh_interval);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception converting REFRESH_INTERVAL:" + e);
@@ -469,7 +471,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
     }
 
     private void ResetSavedGPSStats() {
-    	GPSService.resetGPSStats(getSharedPreferences(Constants.PREFS_NAME, 0));
+    	//GPSService.resetGPSStats(getSharedPreferences(Constants.PREFS_NAME, 0));
         AltitudeGraphReduce.getInstance().restData();
         
         // send the saved values directly to update pebble
@@ -519,9 +521,9 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
     }
 
     private void startVirtualPebble() {
-        if (!checkServiceRunning(VirtualPebbleService.class.getName())) {
+        if (!checkServiceRunning(PebbleService.class.getName())) {
             // only if Pebble was not running on the phone
-            Intent intent = new Intent(getApplicationContext(), VirtualPebbleService.class);
+            Intent intent = new Intent(getApplicationContext(), PebbleService.class);
             startService(intent);
         }
     }
@@ -529,8 +531,8 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
     private void stopVirtualPebble() {
         Log.d(TAG, "stopPEBBLEService()");
 
-        if (checkServiceRunning(VirtualPebbleService.class.getName()))
-            stopService(new Intent(getApplicationContext(), VirtualPebbleService.class));
+        if (checkServiceRunning(PebbleService.class.getName()))
+            stopService(new Intent(getApplicationContext(), PebbleService.class));
     }
 
     private void startGPSService() {
@@ -752,8 +754,8 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
     // dispatches an event which is picked up by the pebble service
     private void sendPebbleEvent(PebbleDictionary dic) {
         String jsonData = dic.toJsonString();
-        Intent dataIntent = new Intent(VirtualPebbleService.PEBBLE_DATA_EVENT);
-        dataIntent.putExtra(VirtualPebbleService.INTENT_EXTRA_NAME,jsonData);
+        Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
+        dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
         sendBroadcast(dataIntent);
     }
 

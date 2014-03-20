@@ -1,4 +1,4 @@
-package com.njackson;
+package com.njackson.hr;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.njackson.R;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -166,8 +166,8 @@ public class HRMScanActivity extends ListActivity {
             }, SCAN_PERIOD);
 
             mScanning = true;
-            UUID[] uuids = { UUID.fromString(BLESampleGattAttributes.HEART_RATE_SERVICE)};
-            mBluetoothAdapter.startLeScan(uuids, mLeScanCallback);
+            //UUID[] uuids = { UUID.fromString(BLESampleGattAttributes.HEART_RATE_SERVICE)};
+            //mBluetoothAdapter.startLeScan(uuids, mLeScanCallback);
             //same with no filtering: mBluetoothAdapter.startLeScan(mLeScanCallback);
         } else {
             mScanning = false;

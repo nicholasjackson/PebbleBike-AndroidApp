@@ -1,27 +1,23 @@
 package com.njackson;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.test.ServiceTestCase;
 import com.getpebble.android.kit.util.PebbleDictionary;
-import com.google.android.gms.location.ActivityRecognitionResult;
-import com.google.android.gms.location.DetectedActivity;
-
-import java.io.Serializable;
+import com.njackson.virtualpebble.PebbleService;
 
 /**
  * Created by server on 11/03/2014.
 */
-public class VirtualPebbleServiceTest extends ServiceTestCase<VirtualPebbleService> {
+public class VirtualPebbleServiceTest extends ServiceTestCase<PebbleService> {
 
     private BroadcastReceiver receiver = null;
     private Bundle results = null;
 
     public VirtualPebbleServiceTest() {
-        super(VirtualPebbleService.class);
+        super(PebbleService.class);
     }
 
     @Override
@@ -46,7 +42,7 @@ public class VirtualPebbleServiceTest extends ServiceTestCase<VirtualPebbleServi
 
         Intent startIntent = new Intent();
         startIntent.putExtra("PEBBLE_DATA", dic.toJsonString());
-        startIntent.setClass(getContext(), VirtualPebbleService.class);
+        startIntent.setClass(getContext(), PebbleService.class);
 
         getSystemContext().startService(startIntent);
         Thread.sleep(100);
