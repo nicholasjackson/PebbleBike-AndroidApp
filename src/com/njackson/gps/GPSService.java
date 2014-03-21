@@ -2,7 +2,6 @@ package com.njackson.gps;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
@@ -16,11 +15,15 @@ import android.location.LocationManager;
 
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.njackson.*;
-import com.njackson.interfaces.ILocationManager;
+import com.njackson.events.GPSService.GPSDisabledEvent;
+import com.njackson.events.GPSService.GPSRefreshChangeEvent;
+import com.njackson.events.GPSService.GPSResetEvent;
+import com.njackson.events.GPSService.NewLocationEvent;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import fr.jayps.android.AdvancedLocation;
 import roboguice.service.RoboService;
 
@@ -37,8 +40,14 @@ public class GPSService extends RoboService {
 	
 	private static final String TAG = "PB-GPSService";
 
-    @Inject private ILocationManager _locationMgr;
+    public static final String OUT_NEW_GPS_LOCATION = "com.njackson.gps.GPSService.NewLocation";
+    public static final String OUT_GPS_DISABLED = "com.njackson.gps.GPSService.NewLocation";
+    public static final String IN_SET_GPS_REFRESH = "com.njackson.gps.GPSService.NewLocation";
+
+    @Inject private LocationManager _locationMgr;
     @Inject private SensorManager _mSensorMgr;
+    @Inject private SharedPreferences _sharedPreferences;
+    @Inject Bus _bus;
 
     private int _updates;
     private float _speed;
@@ -70,6 +79,7 @@ public class GPSService extends RoboService {
     @Override
     public void onCreate() {
         super.onCreate();
+        _bus.register(this);
     }
 
     @Override
@@ -77,7 +87,7 @@ public class GPSService extends RoboService {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private boolean checkGPSEnabled(ILocationManager locationMgr) {
+    private boolean checkGPSEnabled(LocationManager locationMgr) {
         if(!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
            return false;
         } else {
@@ -96,42 +106,50 @@ public class GPSService extends RoboService {
         _mSensorMgr.unregisterListener(mSensorListener);
     }
 
+    //Bus Subscriptions
+    @Subscribe
+    public void onGPSResetEvent(GPSResetEvent event) {
+        resetGPSStats();
+    }
+
+    @Subscribe
+    public void onGPSRefreshChangeEvent(GPSRefreshChangeEvent event) {
+        changeRefreshInterval(event.getRefreshInterval());
+    }
+
     // load the saved state
-    public void loadGPSStats() {
+    private void loadGPSStats() {
     	Log.d(TAG, "loadGPSStats()");
-    	
-    	SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME,0);
-        _speed = settings.getFloat("GPS_SPEED",0.0f);
-        _distance = settings.getFloat("GPS_DISTANCE",0.0f);
+
+        _speed = _sharedPreferences.getFloat("GPS_SPEED",0.0f);
+        _distance = _sharedPreferences.getFloat("GPS_DISTANCE",0.0f);
         _advancedLocation.setDistance(_distance);
-        _advancedLocation.setElapsedTime(settings.getLong("GPS_ELAPSEDTIME", 0));
+        _advancedLocation.setElapsedTime(_sharedPreferences.getLong("GPS_ELAPSEDTIME", 0));
         
         try {
-            _advancedLocation.setAscent(settings.getFloat("GPS_ASCENT", 0.0f));
+            _advancedLocation.setAscent(_sharedPreferences.getFloat("GPS_ASCENT", 0.0f));
         } catch (ClassCastException e) {
             _advancedLocation.setAscent(0.0);
         }
         try {
-            _updates = settings.getInt("GPS_UPDATES",0);
+            _updates = _sharedPreferences.getInt("GPS_UPDATES",0);
         } catch (ClassCastException e) {
             _updates = 0;
         }
         
-        if (settings.contains("GPS_FIRST_LOCATION_LAT") && settings.contains("GPS_FIRST_LOCATION_LON")) {
+        if (_sharedPreferences.contains("GPS_FIRST_LOCATION_LAT") && _sharedPreferences.contains("GPS_FIRST_LOCATION_LON")) {
             firstLocation = new Location("PebbleBike");
-            firstLocation.setLatitude(settings.getFloat("GPS_FIRST_LOCATION_LAT", 0.0f));
-            firstLocation.setLongitude(settings.getFloat("GPS_FIRST_LOCATION_LON", 0.0f));
+            firstLocation.setLatitude(_sharedPreferences.getFloat("GPS_FIRST_LOCATION_LAT", 0.0f));
+            firstLocation.setLongitude(_sharedPreferences.getFloat("GPS_FIRST_LOCATION_LON", 0.0f));
         } else {
             firstLocation = null;
         }
-        
     }
 
     // save the state
-    public void saveGPSStats() {
+    private void saveGPSStats() {
 
-        SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME,0);
-        SharedPreferences.Editor editor = settings.edit();
+        SharedPreferences.Editor editor = _sharedPreferences.edit();
         editor.putFloat("GPS_SPEED", _speed);
         editor.putFloat("GPS_DISTANCE",_distance);
         editor.putLong("GPS_ELAPSEDTIME", _advancedLocation.getElapsedTime());
@@ -145,10 +163,8 @@ public class GPSService extends RoboService {
     }
 
     // reset the saved state
-    public void resetGPSStats(SharedPreferences settings) {
-    	Log.d(TAG, "resetGPSStats()");
-    	
-	    SharedPreferences.Editor editor = settings.edit();
+    private void resetGPSStats() {
+	    SharedPreferences.Editor editor = _sharedPreferences.edit();
 	    editor.putFloat("GPS_SPEED", 0.0f);
 	    editor.putFloat("GPS_DISTANCE",0.0f);
 	    editor.putLong("GPS_ELAPSEDTIME", 0);
@@ -161,8 +177,8 @@ public class GPSService extends RoboService {
         // GPS is running
         // reninit all properties
         _advancedLocation = new AdvancedLocation(getApplicationContext());
-        _advancedLocation.debugLevel = MainActivity.debug ? 2 : 0;
         _advancedLocation.debugTagPrefix = "PB-";
+        //_advancedLocation.debugLevel = MainActivity.debug ? 2 : 0;
 
         loadGPSStats();
     }
@@ -179,16 +195,12 @@ public class GPSService extends RoboService {
         _advancedLocation.debugTagPrefix = "PB-";
 
         loadGPSStats();
-        
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         // check to see if GPS is enabled
         if(checkGPSEnabled(_locationMgr)) {
             requestLocationUpdates(intent.getIntExtra("REFRESH_INTERVAL", 1000));
 
-            SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME,0);
-
-            SharedPreferences.Editor editor = settings.edit();
+            SharedPreferences.Editor editor = _sharedPreferences.edit();
             editor.putLong("GPS_LAST_START", System.currentTimeMillis());
             editor.commit();
             
@@ -200,9 +212,7 @@ public class GPSService extends RoboService {
             broadcastIntent.putExtra("ASCENT", _advancedLocation.getAscent());
             sendBroadcast(broadcastIntent);
         }else {
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(MainActivity.GPSServiceReceiver.ACTION_GPS_DISABLED);
-            sendBroadcast(broadcastIntent);
+            _bus.post(new GPSDisabledEvent());
             return;
         }
 
@@ -211,13 +221,13 @@ public class GPSService extends RoboService {
     }
 
     private void requestLocationUpdates(int refresh_interval) {
-        Log.d(TAG, "_requestLocationUpdates("+refresh_interval+")");
+
         _refresh_interval = refresh_interval;
 
         if (_gpsStarted) {
             _locationMgr.removeUpdates(_locationListener);
         }
-        _locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, _refresh_interval, 2, _locationListener);
+        _locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, (long)_refresh_interval, 2.0f, _locationListener);
 
         _gpsStarted = true;
     }
@@ -330,24 +340,24 @@ public class GPSService extends RoboService {
     };
     
     private void broadcastLocation() {
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(MainActivity.GPSServiceReceiver.ACTION_RESP);
-        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastIntent.putExtra("SPEED",       _advancedLocation.getSpeed());
-        broadcastIntent.putExtra("DISTANCE",    _advancedLocation.getDistance());
-        broadcastIntent.putExtra("AVGSPEED",    _advancedLocation.getAverageSpeed());
-        broadcastIntent.putExtra("LAT",         _advancedLocation.getLatitude());
-        broadcastIntent.putExtra("LON",         _advancedLocation.getLongitude());
-        broadcastIntent.putExtra("ALTITUDE",    _advancedLocation.getAltitude()); // m
-        broadcastIntent.putExtra("ASCENT",      _advancedLocation.getAscent()); // m
-        broadcastIntent.putExtra("ASCENTRATE",  (3600f * _advancedLocation.getAscentRate())); // in m/h
-        broadcastIntent.putExtra("SLOPE",       (100f * _advancedLocation.getSlope())); // in %
-        broadcastIntent.putExtra("ACCURACY",   _advancedLocation.getAccuracy()); // m
-        broadcastIntent.putExtra("TIME",        _advancedLocation.getElapsedTime());
-        broadcastIntent.putExtra("XPOS",        xpos);
-        broadcastIntent.putExtra("YPOS",        ypos);
-        broadcastIntent.putExtra("BEARING",     _advancedLocation.getBearing());
-        sendBroadcast(broadcastIntent);
+        NewLocationEvent event = new NewLocationEvent();
+
+        event.setSpeed(_advancedLocation.getSpeed());
+        event.setDistance(_advancedLocation.getDistance());
+        event.setAvgSpeed(_advancedLocation.getAverageSpeed());
+        event.setLatitude(_advancedLocation.getLatitude());
+        event.setLongitude(_advancedLocation.getLongitude());
+        event.setAltitude(_advancedLocation.getAltitude()); // m
+        event.setAscent(_advancedLocation.getAscent()); // m
+        event.setAscentRate(3600f * _advancedLocation.getAscentRate()); // in m/h
+        event.setSlope(100f * _advancedLocation.getSlope()); // in %
+        event.setAccuracy(_advancedLocation.getAccuracy()); // m
+        event.setTime(_advancedLocation.getElapsedTime());
+        event.setXpos(xpos);
+        event.setYpos(ypos);
+        event.setBearing(_advancedLocation.getBearing());
+
+        _bus.post(event);
     }
 
     private void makeServiceForeground(String titre, String texte) {
