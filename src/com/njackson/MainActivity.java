@@ -26,6 +26,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.DetectedActivity;
 
+import com.njackson.activityrecognition.ActivityRecognitionIntentService;
 import com.njackson.gps.GPSService;
 import com.njackson.util.AltitudeGraphReduce;
 import com.njackson.virtualpebble.PebbleService;

@@ -1,9 +1,15 @@
-package com.njackson;
+package com.njackson.activityrecognition;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 import com.google.android.gms.location.*;
+import com.njackson.MainActivity;
+import com.njackson.events.ActivityRecognitionService.NewActivityEvent;
+import com.squareup.otto.Bus;
+import roboguice.service.RoboIntentService;
+
+import javax.inject.Inject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,18 +18,14 @@ import com.google.android.gms.location.*;
  * Time: 21:38
  * To change this template use File | Settings | File Templates.
  */
-public class ActivityRecognitionIntentService extends IntentService {
+public class ActivityRecognitionIntentService extends RoboIntentService {
 	
 	private static final String TAG = "PB-ActivityRecognitionIntentService";
 
-    public ActivityRecognitionIntentService() {
-        super("ActivityRecognitionIntentService");
-        Log.d(TAG, "Start");
-    }
+    @Inject Bus _bus;
 
     public ActivityRecognitionIntentService(String name) {
         super(name);
-        Log.d(TAG, "Start: " + name);
     }
 
     @Override
@@ -55,12 +57,7 @@ public class ActivityRecognitionIntentService extends IntentService {
     }
 
     private void sendReply(int type) {
-        Intent broadcastIntent = new Intent();
-
-        broadcastIntent.setAction(MainActivity.ActivityRecognitionReceiver.ACTION_RESP);
-        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastIntent.putExtra("ACTIVITY_CHANGED", type);
-        sendBroadcast(broadcastIntent);
+        _bus.post(new NewActivityEvent(type));
     }
 
 }
