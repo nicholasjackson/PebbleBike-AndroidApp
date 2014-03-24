@@ -2,8 +2,6 @@ package com.njackson.tests.service;
 
 import android.app.Application;
 import android.content.*;
-import android.location.LocationManager;
-import android.os.Bundle;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.inject.AbstractModule;
@@ -11,13 +9,13 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import com.njackson.activityrecognition.ActivityRecognitionIntentService;
 import com.njackson.events.ActivityRecognitionService.NewActivityEvent;
-import com.njackson.events.GPSService.GPSRefreshChangeEvent;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import roboguice.RoboGuice;
 
@@ -31,7 +29,7 @@ import static junit.framework.Assert.assertNotNull;
 public class ActivityRecognitionServiceTest {
 
     private Bus _bus = new Bus();
-    private ActivityRecognitionIntentService _service;
+    private MyBroadcastIntentServiceMock _service;
     private NewActivityEvent _event;
 
     public class DITestModule extends AbstractModule {
@@ -50,7 +48,7 @@ public class ActivityRecognitionServiceTest {
     @Before
     public void setUp(){
         _bus.register(this);
-        _service = new ActivityRecognitionIntentService("ACIntentService");
+        _service = new MyBroadcastIntentServiceMock("ACIntentService");
         setupGuice(_service.getApplication());
     }
 
@@ -83,12 +81,26 @@ public class ActivityRecognitionServiceTest {
         DetectedActivity activity = new DetectedActivity(activityType, 1);
         ActivityRecognitionResult result = new ActivityRecognitionResult(activity, 1000, 1000);
 
-        _service.onCreate();
+        Context context = Robolectric.getShadowApplication().getApplicationContext();
+
         Intent startIntent = new Intent();
         startIntent.putExtra(ActivityRecognitionResult.EXTRA_ACTIVITY_RESULT, result);
-        _service.onStartCommand(startIntent,0,44);
+
+        _service.onCreate();
+        _service.onHandleIntent(startIntent);
 
         Thread.sleep(100);
+    }
+
+    class MyBroadcastIntentServiceMock extends ActivityRecognitionIntentService {
+        public MyBroadcastIntentServiceMock(String name) {
+            super(name);
+        }
+
+        @Override
+        public void onHandleIntent(Intent intent) {
+            super.onHandleIntent(intent);
+        }
     }
 
 }

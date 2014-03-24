@@ -1,8 +1,12 @@
-package com.njackson;
+package com.njackson.tests.misc;
 
-import android.test.AndroidTestCase;
-import com.njackson.util.AltitudeGraphReduce;
-import junit.framework.Assert;
+        import com.njackson.util.AltitudeGraphReduce;
+        import junit.framework.Assert;
+        import org.junit.After;
+        import org.junit.Before;
+        import org.junit.Test;
+
+        import static junit.framework.TestCase.assertTrue;
 
 /**
  * This is a simple framework for a test of an Application.  See
@@ -14,16 +18,19 @@ import junit.framework.Assert;
  * -e class com.njackson.MainActivityTest \
  * com.njackson.tests/android.test.InstrumentationTestRunner
  */
-public class AltitudeGraphReduceTest extends AndroidTestCase {
+public class AltitudeGraphReduceTest {
 
+    @Before
     public void setUp() {
 
     }
 
+    @After
     public void tearDown() {
         AltitudeGraphReduce.getInstance().restData();
     }
 
+    @Test
     public void testMinAltitude() {
 
         AltitudeGraphReduce alt = AltitudeGraphReduce.getInstance();
@@ -40,6 +47,7 @@ public class AltitudeGraphReduceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testMaxAltitude() {
 
         AltitudeGraphReduce alt = AltitudeGraphReduce.getInstance();
@@ -56,6 +64,7 @@ public class AltitudeGraphReduceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testCacheSize() throws InterruptedException {
         AltitudeGraphReduce alt = AltitudeGraphReduce.getInstance();
         int binInterval = 100;
@@ -77,6 +86,7 @@ public class AltitudeGraphReduceTest extends AndroidTestCase {
                 cacheSize == expectedSize);
     }
 
+    @Test
     public void testBinData() throws InterruptedException {
         AltitudeGraphReduce alt = AltitudeGraphReduce.getInstance();
         int binInterval = 100;
