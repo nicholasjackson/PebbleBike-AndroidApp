@@ -357,9 +357,9 @@ public class LiveTracking {
 
     private void sendPebbleEvent(PebbleDictionary dic) {
         String jsonData = dic.toJsonString();
-        Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
-        dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
-        _context.sendBroadcast(dataIntent);
+        //Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
+        //dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
+        //_context.sendBroadcast(dataIntent);
     }
 
     public byte[] getMsgLiveShort(Location firstLocation) {

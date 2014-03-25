@@ -2,14 +2,19 @@ package com.njackson.tests.service;
 
 import android.app.Service;
 import android.content.Intent;
+import com.getpebble.android.kit.util.PebbleDictionary;
 import com.google.inject.AbstractModule;
+import com.njackson.events.GPSService.NewLocationEvent;
 import com.njackson.virtualpebble.PebbleService;
 import com.njackson.interfaces.IMessageManager;
+
+import com.squareup.otto.Bus;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
@@ -32,11 +37,14 @@ public class PebbleServiceTest {
     protected Application application;// = mock(Application.class, RETURNS_DEEP_STUBS);
     protected Context context = mock(Application.class, RETURNS_DEEP_STUBS);
     protected IMessageManager _mockMessageManager = mock(IMessageManager.class);
+    protected Bus _bus = new Bus();
 
     public class DITestModule extends AbstractModule {
         @Override
         protected void configure() {
+
             bind(IMessageManager.class).toInstance(_mockMessageManager);
+            bind(Bus.class).toInstance(_bus);
         }
     }
 
@@ -59,11 +67,20 @@ public class PebbleServiceTest {
     @After
     public void tearDown() {
         _service.onDestroy();
-        RoboGuice.util.reset();//reset robo guice to prevent poloution
+        RoboGuice.util.reset();//reset robo guice to prevent pollution
     }
 
     @Test
     public void serviceSetsApplicationContext() {
         Mockito.verify(_mockMessageManager,Mockito.times(1)).setContext(application);
+    }
+
+    public void serviceRespondsToNewGPSLocation() {
+        ArgumentCaptor<PebbleDictionary> captor = new ArgumentCaptor<PebbleDictionary>();
+
+        NewLocationEvent event = new NewLocationEvent();
+        _bus.post(event);
+
+        verify(_mockMessageManager,Mockito.times(1)).offer(captor.getValue());
     }
 }

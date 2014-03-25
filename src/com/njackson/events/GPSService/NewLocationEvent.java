@@ -117,4 +117,7 @@ public class NewLocationEvent {
         this._bearing = _bearing;
     }
 
+    private int _units;
+    public int getUnits() { return this._units; }
+    public void setUnits(int units) { this._units = units;}
 }

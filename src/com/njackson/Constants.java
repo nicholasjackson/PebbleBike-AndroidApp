@@ -18,7 +18,7 @@ public class Constants {
     public static final int MIN_VERSION_PEBBLE = 22;
 
     public static final int LIVE_TRACKING_FRIENDS = 0x10;
-    public static final int ALTITUDE_DATA = 0x13;
+    public static final int PEBBLE_LOCTATION_DATA = 0x13;
     public static final int STATE_CHANGED = 0x14;
     public static final int MSG_VERSION_PEBBLE = 0x15;
     public static final int MSG_VERSION_ANDROID = 0x16;

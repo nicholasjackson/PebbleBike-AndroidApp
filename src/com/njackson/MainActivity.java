@@ -403,7 +403,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             data[19] = (byte) (((int)  (intent.getFloatExtra("BEARING", 0.0f) / 360 * 256)) % 256);
             data[20] = (byte) ((intent.getIntExtra("HEARTRATE", 255)) % 256);
 
-            dic.addBytes(Constants.ALTITUDE_DATA, data);
+            dic.addBytes(Constants.PEBBLE_LOCTATION_DATA, data);
             
             for( int i = 0; i < data.length; i++ ) {
                 sending += " data["+i+"]: "   + ((256+data[i])%256);
@@ -755,9 +755,9 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
     // dispatches an event which is picked up by the pebble service
     private void sendPebbleEvent(PebbleDictionary dic) {
         String jsonData = dic.toJsonString();
-        Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
-        dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
-        sendBroadcast(dataIntent);
+        //Intent dataIntent = new Intent(PebbleService.PEBBLE_DATA_EVENT);
+        //dataIntent.putExtra(PebbleService.INTENT_EXTRA_NAME,jsonData);
+        //sendBroadcast(dataIntent);
     }
 
 
