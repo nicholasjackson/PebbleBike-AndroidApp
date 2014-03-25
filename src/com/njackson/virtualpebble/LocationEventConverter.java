@@ -9,12 +9,17 @@ import com.njackson.events.GPSService.NewLocationEvent;
  * Converts NewLocationEvent to a Pebble Dictionary object
  */
 public class LocationEventConverter {
+
+    private static final int POS_UNITS=0;
+    private static final int POS_SERVICE_RUNNING=1;
+
     public static PebbleDictionary Convert(NewLocationEvent event) {
 
         PebbleDictionary dic = new PebbleDictionary();
         byte[] data = new byte[21];
 
-        data[0] = (byte) ((event.getUnits() % 2) * (1<<0));
+        data[0] = (byte) ((event.getUnits() % 2) * (1<<POS_UNITS)); // set the units
+        data[0] += (byte) ((event.getServiceRunning() ? 1: 0) * (1<<POS_SERVICE_RUNNING));
 
         dic.addBytes(Constants.PEBBLE_LOCTATION_DATA,data);
         return dic;

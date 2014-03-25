@@ -19,6 +19,7 @@ public class LocationEventConverterTest {
 
         NewLocationEvent event = new NewLocationEvent();
         event.setUnits(1);
+        event.setServiceRunning(true);
         event.setBearing(1.1);
         event.setYpos(2.2);
         event.setXpos(3.3);
@@ -38,12 +39,14 @@ public class LocationEventConverterTest {
         byte[] data = dic.getBytes(Constants.PEBBLE_LOCTATION_DATA);
 
         assertNotNull("Data should not be null",data);
-        assertEquals("Expected units to be 1",0,getBit(data[0],1));
+        assertEquals("Expected units bit to be true",true,bitIsSet(data[0],0));
+        assertEquals("Expected service running bit to be true",true,bitIsSet(data[0],1));
     }
 
-    private int getBit(byte b, int position)
+    private boolean bitIsSet(byte b, int position)
     {
-        return (b >> position) & 1;
+        int bit = (b >> position & 1);
+        return bit == 1;
     }
 
 }
