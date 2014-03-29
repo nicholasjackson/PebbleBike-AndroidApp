@@ -49,6 +49,7 @@ public class PebbleService extends RoboService {
     @Override
     public void onCreate() {
         super.onCreate();
+        _bus.register(this);
     }
 
     @Override
@@ -62,8 +63,7 @@ public class PebbleService extends RoboService {
 
     @Subscribe
     public void onNewLocationEvent(NewLocationEvent newLocation) {
-        PebbleDictionary dictionary = new PebbleDictionary();
-
+        PebbleDictionary dictionary = LocationEventConverter.Convert(newLocation,false,false,false,1000,0);
         sendDataToPebble(dictionary);
     }
 

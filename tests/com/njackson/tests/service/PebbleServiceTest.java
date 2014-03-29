@@ -4,7 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.google.inject.AbstractModule;
+import com.njackson.Constants;
 import com.njackson.events.GPSService.NewLocationEvent;
+import com.njackson.virtualpebble.LocationEventConverter;
 import com.njackson.virtualpebble.PebbleService;
 import com.njackson.interfaces.IMessageManager;
 
@@ -75,12 +77,21 @@ public class PebbleServiceTest {
         Mockito.verify(_mockMessageManager,Mockito.times(1)).setContext(application);
     }
 
+    @Test
     public void serviceRespondsToNewGPSLocation() {
         ArgumentCaptor<PebbleDictionary> captor = new ArgumentCaptor<PebbleDictionary>();
 
         NewLocationEvent event = new NewLocationEvent();
+        event.setUnits(0);
+        event.setSpeed(45.4f);
+
         _bus.post(event);
 
-        verify(_mockMessageManager,Mockito.times(1)).offer(captor.getValue());
+        verify(_mockMessageManager, Mockito.times(1)).offer(captor.capture());
+        PebbleDictionary dic = captor.getValue();
+
+        byte[] data = dic.getBytes(Constants.PEBBLE_LOCTATION_DATA);
+        assertEquals("Speed should be -9",-9,data[LocationEventConverter.BYTE_SPEED1]);
+        assertEquals("Speed should be 3",3,data[LocationEventConverter.BYTE_SPEED2]);
     }
 }
