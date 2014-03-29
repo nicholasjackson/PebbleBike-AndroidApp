@@ -128,7 +128,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             activity.setStartButtonVisibility(!_activityRecognition);
 
         try {
-        	setConversionUnits(Integer.valueOf(prefs.getString("UNITS_OF_MEASURE", "0")));
+        	//setConversionUnits(Integer.valueOf(prefs.getString("UNITS_OF_MEASURE", "0")));
         } catch (Exception e) {
         	Log.e(TAG, "Exception:" + e);
         }
@@ -151,25 +151,6 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             stopVirtualPebble();
             stopGPSService();
         }
-    }
-
-    public void setConversionUnits(int units) {
-        _units = units;
-        
-        if(units == Constants.IMPERIAL) {
-            _speedConversion = (float)Constants.MS_TO_MPH;
-            _distanceConversion = (float)Constants.M_TO_MILES;
-            _altitudeConversion = (float)Constants.M_TO_FEET;
-        } else {
-            _speedConversion = (float)Constants.MS_TO_KPH;
-            _distanceConversion = (float)Constants.M_TO_KM;
-            _altitudeConversion = (float)Constants.M_TO_M;
-        }
-
-        // set the screen units
-        HomeActivity homeScreen = getHomeScreen();
-        if(homeScreen != null)
-            homeScreen.setUnits(units);
     }
 
     @Override
@@ -210,7 +191,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             if (getIntent().getExtras().containsKey("version")) {
                 Log.d(TAG, "onCreate() version:" + getIntent().getExtras().getInt("version"));
                 notificationVersion(getIntent().getExtras().getInt("version"));
-                resendLastDataToPebble();
+                //resendLastDataToPebble();
             }
         }
         
@@ -265,7 +246,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             if (intent.getExtras().containsKey("version")) {
                 Log.d(TAG, "onNewIntent() version:" + intent.getExtras().getInt("version"));
                 notificationVersion(intent.getExtras().getInt("version"));
-                resendLastDataToPebble();
+                //resendLastDataToPebble();
             }
         }
     }
@@ -309,109 +290,6 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             dic.addInt32(Constants.STATE_CHANGED,Constants.STATE_STOP);
         }
         Log.d(TAG, " STATE_CHANGED: "   + dic.getInteger(Constants.STATE_CHANGED));
-        sendPebbleEvent(dic);
-    }
-    
-    private Intent _lastIntent = null;
-
-    private void resendLastDataToPebble() {
-        sendDataToPebble(_lastIntent);
-    }
-
-    public void sendDataToPebble(Intent intent) {
-    	//Log.d(TAG, "sendDataToPebble()");
-        
-        PebbleDictionary dic = new PebbleDictionary();
-        String sending = "Sending ";
-        boolean forceSend = false;
-        
-        if (intent == null) {
-            Log.d(TAG, "sendDataToPebble(intent == null)");
-            intent = new Intent();
-            
-            SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME,0);
-            float distance = settings.getFloat("GPS_DISTANCE", 0.0f);
-            intent.putExtra("DISTANCE", distance);
-            
-            dic.addInt32(Constants.MSG_VERSION_ANDROID, Constants.VERSION_ANDROID);
-            sending += " MSG_VERSION_ANDROID: "   + dic.getInteger(Constants.MSG_VERSION_ANDROID);
-
-            forceSend = true;
-        }
-
-        if (intent != null) {
-            _lastIntent = intent;
-
-            byte[] data = new byte[21];
-
-            data[0] = (byte) ((_units % 2) * (1<<0));
-            data[0] += (byte) ((checkServiceRunning(GPSService.class.getName()) ? 1 : 0) * (1<<1));
-            data[0] += (byte) ((debug ? 1 : 0) * (1<<2));
-            data[0] += (byte) ((_liveTracking ? 1 : 0) * (1<<3));
-            
-            int refresh_code = 1; // 1s
-            if (_refresh_interval < 1000) {
-                refresh_code = 0; // [0;1[
-            } else if (_refresh_interval >= 5000) {
-                refresh_code = 3; // [5;+inf
-            } else if (_refresh_interval > 1000) {
-                refresh_code = 2; // ]1;5[
-            }
-            data[0] += (byte) ((refresh_code % 4) * (1<<4)); // 2 bits
-            // unused bits
-            data[0] += (byte) (0 * (1<<6));
-            data[0] += (byte) (0 * (1<<7));
-            //Log.d(TAG, _units+"|"+checkServiceRunning()+"|debug:"+debug+"|"+_liveTracking+"|_refresh_interval="+_refresh_interval+"|refresh_code="+refresh_code+"|"+((256+data[0])%256));
-            
-            data[1] = (byte) ((int)  Math.ceil(intent.getFloatExtra("ACCURACY", 0.0f)));
-            data[2] = (byte) (((int) (Math.floor(100 * intent.getFloatExtra("DISTANCE", 0.0f) * _distanceConversion) / 1)) % 256);
-            data[3] = (byte) (((int) (Math.floor(100 * intent.getFloatExtra("DISTANCE", 0.0f) * _distanceConversion) / 1)) / 256);
-            data[4] = (byte) (((int) intent.getLongExtra("TIME", 0) / 1000) % 256);
-            data[5] = (byte) (((int) intent.getLongExtra("TIME", 0) / 1000) / 256);
-
-            data[6] = (byte) (((int) (intent.getDoubleExtra("ALTITUDE", 0) * _altitudeConversion)) % 256);
-            data[7] = (byte) (((int) (intent.getDoubleExtra("ALTITUDE", 0) * _altitudeConversion)) / 256);
-
-            data[8] = (byte) (((int) Math.abs(intent.getDoubleExtra("ASCENT", 0) * _altitudeConversion)) % 256);
-            data[9] = (byte) ((((int) Math.abs(intent.getDoubleExtra("ASCENT", 0) * _altitudeConversion)) / 256) % 128);
-            if (intent.getDoubleExtra("ASCENT", 0.0f) < 0) {
-                data[9] += 128;
-            }
-            data[10] = (byte) (((int) Math.abs(intent.getFloatExtra("ASCENTRATE", 0.0f) * _altitudeConversion)) % 256);
-            data[11] = (byte) ((((int) Math.abs(intent.getFloatExtra("ASCENTRATE", 0.0f) * _altitudeConversion)) / 256) % 128);
-            if (intent.getFloatExtra("ASCENTRATE", 0.0f) < 0) {
-                data[11] += 128;
-            }            
-            data[12] = (byte) (((int) Math.abs(intent.getFloatExtra("SLOPE", 0.0f))) % 128);
-            if (intent.getFloatExtra("SLOPE", 0.0f) < 0) {
-                data[12] += 128;
-            }            
-
-            data[13] = (byte) (((int) Math.abs(intent.getDoubleExtra("XPOS", 0))) % 256);
-            data[14] = (byte) ((((int) Math.abs(intent.getDoubleExtra("XPOS", 0))) / 256) % 128);
-            if (intent.getDoubleExtra("XPOS", 0) < 0) {
-                data[14] += 128;
-            }
-            data[15] = (byte) (((int) Math.abs(intent.getDoubleExtra("YPOS", 0))) % 256);
-            data[16] = (byte) ((((int) Math.abs(intent.getDoubleExtra("YPOS", 0))) / 256) % 128);
-            if (intent.getDoubleExtra("YPOS", 0) < 0) {
-                data[16] += 128;
-            }
-
-            data[17] = (byte) (((int) (Math.floor(10 * intent.getFloatExtra("SPEED", 0.0f) * _speedConversion) / 1)) % 256);
-            data[18] = (byte) (((int) (Math.floor(10 * intent.getFloatExtra("SPEED", 0.0f) * _speedConversion) / 1)) / 256);
-            data[19] = (byte) (((int)  (intent.getFloatExtra("BEARING", 0.0f) / 360 * 256)) % 256);
-            data[20] = (byte) ((intent.getIntExtra("HEARTRATE", 255)) % 256);
-
-            dic.addBytes(Constants.PEBBLE_LOCTATION_DATA, data);
-            
-            for( int i = 0; i < data.length; i++ ) {
-                sending += " data["+i+"]: "   + ((256+data[i])%256);
-            }
-        }
-
-        if (MainActivity.debug)
-            Log.d(TAG, sending);
         sendPebbleEvent(dic);
     }
 
@@ -480,7 +358,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
         intent.putExtra("DISTANCE", 0);
         intent.putExtra("AVGSPEED", 0);
         intent.putExtra("ASCENT",   0);
-        sendDataToPebble(intent);
+        //sendDataToPebble(intent);
     }
 
     private void setStartButtonText(String text) {
@@ -549,7 +427,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
             PebbleKit.startAppOnPebble(getApplicationContext(), Constants.WATCH_UUID);
         }
         // in all cases
-        resendLastDataToPebble();
+        //resendLastDataToPebble();
     }
 
     private void stopGPSService() {
@@ -724,7 +602,7 @@ public class MainActivity extends SherlockFragmentActivity  implements  GooglePl
                     if (debug) Log.d(TAG, "skip sendDataToPebble");
                 } else {
                     _sendDataToPebbleLastTime = System.currentTimeMillis();
-                    sendDataToPebble(intent);
+                    //sendDataToPebble(intent);
                 }
                 updateScreen(intent);
             } else if(intent.getAction().compareTo(ACTION_GPS_DISABLED) == 0) {

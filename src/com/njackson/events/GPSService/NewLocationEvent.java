@@ -121,7 +121,4 @@ public class NewLocationEvent {
     public int getUnits() { return this._units; }
     public void setUnits(int units) { this._units = units;}
 
-    private boolean _serviceRunning;
-    public boolean getServiceRunning() { return _serviceRunning; }
-    public void setServiceRunning(boolean _serviceRunning) { this._serviceRunning = _serviceRunning; }
 }
