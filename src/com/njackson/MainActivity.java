@@ -30,9 +30,11 @@ import com.njackson.activityrecognition.ActivityRecognitionIntentService;
 import com.njackson.gps.GPSService;
 import com.njackson.util.AltitudeGraphReduce;
 import com.njackson.virtualpebble.PebbleService;
+import com.squareup.otto.Bus;
 import de.cketti.library.changelog.ChangeLog;
 import roboguice.activity.RoboActivity;
 
+import javax.inject.Inject;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -40,6 +42,9 @@ import java.util.Locale;
 public class MainActivity extends RoboActivity {
 	
 	private static final String TAG = "PB-MainActivity";
+
+    @Inject private SharedPreferences _sharedPreferences;
+    @Inject Bus _bus;
 
     public void loadPreferences() {
     	loadPreferences(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
