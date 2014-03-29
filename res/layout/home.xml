@@ -54,11 +54,10 @@
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="100dp" android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true" android:id="@id/MAIN_GRID" android:padding="1dp"
-            android:background="@color/abs__background_holo_dark">
+            android:layout_alignParentTop="true" android:id="@id/MAIN_GRID" android:padding="1dp">
         <RelativeLayout
                 android:layout_width="50dp"
-                android:layout_height="fill_parent" android:background="@color/abs__background_holo_light"
+                android:layout_height="fill_parent"
                 android:paddingLeft="1dp">
             <ImageView
                     android:layout_width="wrap_content"
@@ -70,7 +69,7 @@
         <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="fill_parent" android:layout_weight="1"
-                android:background="@color/abs__background_holo_light" android:layout_marginLeft="1dp"
+                android:layout_marginLeft="1dp"
                 android:layout_marginRight="1dp">
 
             <TextView
@@ -96,7 +95,7 @@
         <TableLayout
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent" android:layout_alignParentLeft="false"
-                android:layout_alignParentTop="true" android:background="@color/abs__background_holo_dark"
+                android:layout_alignParentTop="true"
                 android:columnCount="3" android:rowCount="1">
 
             <TableRow
@@ -104,7 +103,7 @@
                     android:layout_height="fill_parent" android:layout_marginBottom="1dp">
                 <RelativeLayout
                         android:layout_width="80dp"
-                        android:layout_height="50dp" android:background="@color/abs__background_holo_light"
+                        android:layout_height="50dp"
                         >
                     <TextView
                             android:layout_width="wrap_content"
@@ -126,7 +125,7 @@
                       android:layout_height="fill_parent">
                 <RelativeLayout
                         android:layout_width="80dp"
-                        android:layout_height="50dp" android:background="@color/abs__background_holo_light"
+                        android:layout_height="50dp"
                         >
                     <TextView
                             android:layout_width="wrap_content"

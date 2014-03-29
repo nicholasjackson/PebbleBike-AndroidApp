@@ -9,9 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.actionbarsherlock.app.SherlockFragment;
 import com.njackson.gps.GPSService;
 import com.njackson.util.AltitudeGraphReduce;
+import roboguice.fragment.RoboFragment;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Time: 21:47
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends SherlockFragment {
+public class HomeActivity extends RoboFragment {
 	
 	private static final String TAG = "PB-HomeActivity";
 
@@ -135,14 +135,6 @@ public class HomeActivity extends SherlockFragment {
 
             }
         });
-
-        // if we are using activity recognition hide the start button
-        setStartButtonVisibility(!MainActivity.getInstance().activityRecognitionEnabled());
-
-        if(MainActivity.getInstance().checkServiceRunning(GPSService.class.getName()))
-            setStartButtonText(getString(R.string.START_BUTTON_STOP));
-        else
-            setStartButtonText(getString(R.string.START_BUTTON_START));
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         int units = Integer.valueOf(prefs.getString("UNITS_OF_MEASURE", "0"));

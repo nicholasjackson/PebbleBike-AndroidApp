@@ -61,10 +61,10 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         Preference pref;
         Preference pref2 = findPreference("pref_install_sdk2");
         pref2.setOnPreferenceClickListener(pref_install_click_listener);
-        if (MainActivity.pebbleFirmwareVersion == 2) {
-            pref2.setTitle(pref2.getTitle() + " [your version]");
-            pref2.setSummary(pref2.getSummary() + " This is the version compatible with your current Pebble firmware.");
-        }
+        //if (MainActivity.pebbleFirmwareVersion == 2) {
+        //    pref2.setTitle(pref2.getTitle() + " [your version]");
+        //    pref2.setSummary(pref2.getSummary() + " This is the version compatible with your current Pebble firmware.");
+        //}
 
         pref = findPreference("PREF_PRESSURE_INFO");
         SensorManager mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -74,14 +74,14 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
             pref.setSummary("No pressure sensor");
         }
 
-        pref = findPreference("PREF_GEOID_HEIGHT_INFO");
-        if (MainActivity.geoidHeight != 0) {
-            pref.setSummary("Correction: " + MainActivity.geoidHeight + "m");
-        } else {
-            pref.setSummary("No correction");
-        }
+        //pref = findPreference("PREF_GEOID_HEIGHT_INFO");
+        //if (MainActivity.geoidHeight != 0) {
+        //    pref.setSummary("Correction: " + MainActivity.geoidHeight + "m");
+        //} else {
+        //    pref.setSummary("No correction");
+        //}
 
-        _setHrmSummary();
+        //_setHrmSummary();
 
         // check to determine whether BLE is supported on the device.
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -114,18 +114,18 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
            editor.commit();
 
            // reload prefs
-           MainActivity.getInstance().loadPreferences();
+           //MainActivity.getInstance().loadPreferences();
 
-           _setHrmSummary();
+           //_setHrmSummary();
 
-           if (!hrm_address.equals("")) {
-               if (MainActivity.getInstance().checkServiceRunning(GPSService.class.getName())) {
-                   Toast.makeText(getApplicationContext(), "Please restart GPS to display heart rate", Toast.LENGTH_LONG).show();
-               } else {
-                   // only one toast message...
-                   Toast.makeText(getApplicationContext(), "Beta version: heart rate will be sent to Pebble instead of instant speed", Toast.LENGTH_LONG).show();
-               }
-           }
+           //if (!hrm_address.equals("")) {
+           //    if (MainActivity.getInstance().checkServiceRunning(GPSService.class.getName())) {
+           //        Toast.makeText(getApplicationContext(), "Please restart GPS to display heart rate", Toast.LENGTH_LONG).show();
+           //    } else {
+           //        // only one toast message...
+           //        Toast.makeText(getApplicationContext(), "Beta version: heart rate will be sent to Pebble instead of instant speed", Toast.LENGTH_LONG).show();
+           //    }
+           //}
         }
     }
     private boolean install_watchface(int sdkVersion) {
@@ -140,10 +140,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         } catch (NameNotFoundException e) {
             versionCode = 0;
         }
-        Log.d(TAG, "versionCode:" + versionCode);
-        Log.d(TAG, "sdkVersion:" + sdkVersion);
-        Log.d(TAG, "peebleFirmwareVersion:" + MainActivity.pebbleFirmwareVersion);
-        
+
         try {
             String uriString;
             if (sdkVersion == 2) {
@@ -196,6 +193,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         CharSequence listDesc = oruxPref.getEntry();
         oruxPref.setSummary(listDesc);
     }
+    /*
     private void _setHrmSummary() {
         String summary = MainActivity.hrm_name;
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -207,7 +205,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         Preference loginPref = findPreference("PREF_HRM");
         loginPref.setSummary(summary);
     }
-
+    */
 	@Override
     protected void onResume() {
         super.onResume();
@@ -242,10 +240,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         if (key.equals("ORUXMAPS_AUTO")) {
             _setOruxMapsSummary(sharedPreferences);
         }
-
-        MainActivity activity = MainActivity.getInstance();
-        if(activity != null)
-            activity.loadPreferences(sharedPreferences);
     }
 
 }

@@ -203,14 +203,7 @@ public class GPSService extends RoboService {
             SharedPreferences.Editor editor = _sharedPreferences.edit();
             editor.putLong("GPS_LAST_START", System.currentTimeMillis());
             editor.commit();
-            
-            // send the saved values directly to update pebble
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(MainActivity.GPSServiceReceiver.ACTION_RESP);
-            broadcastIntent.putExtra("DISTANCE", _advancedLocation.getDistance());
-            broadcastIntent.putExtra("AVGSPEED", _advancedLocation.getAverageSpeed());
-            broadcastIntent.putExtra("ASCENT", _advancedLocation.getAscent());
-            sendBroadcast(broadcastIntent);
+
         }else {
             _bus.post(new GPSDisabledEvent());
             return;
@@ -301,11 +294,7 @@ public class GPSService extends RoboService {
                try {
                    // Height of geoid above WGS84 ellipsoid
                    double geoid_height = Double.parseDouble(strValues[11]);
-
-                   if (MainActivity.debug) Log.d(TAG, "nmea geoid_height: " + geoid_height);
                    _advancedLocation.setGeoidHeight(geoid_height);
-                   MainActivity.geoidHeight = geoid_height;
-
                    _locationMgr.removeNmeaListener(mNmeaListener);
                } catch (Exception e) {
                }
@@ -330,8 +319,6 @@ public class GPSService extends RoboService {
             if( Sensor.TYPE_PRESSURE == event.sensor.getType()) {
                 pressure_value = event.values[0];
                 altitude = SensorManager.getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, pressure_value);
-                if (MainActivity.debug) Log.d(TAG, "pressure_value=" + pressure_value + " altitude=" + altitude);
-
                 _advancedLocation.onAltitudeChanged(altitude);
 
                 broadcastLocation();

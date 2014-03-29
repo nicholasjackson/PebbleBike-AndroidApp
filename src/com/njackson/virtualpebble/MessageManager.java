@@ -134,11 +134,6 @@ public class MessageManager implements IMessageManager, Runnable {
 
     public boolean offer(final PebbleDictionary data) {
         final boolean success = messageQueue.offer(data);
-        if (MainActivity.debug) {
-            int s = messageQueue.size();
-            if (s > 1) Log.d(TAG, "offer s:" + s);
-        }
-
         if (success) {
             consumeAsync();
         }
@@ -151,13 +146,10 @@ public class MessageManager implements IMessageManager, Runnable {
         synchronized (messageQueue) {
             int s = messageQueue.size();
             if (s > sizeMax) {
-                if (MainActivity.debug) Log.d(TAG, "offerIfLow s:" + s + ">" + sizeMax);
+
                 return false;
             }
             success = messageQueue.offer(data);
-            if (MainActivity.debug) {
-                if (s > 1) Log.d(TAG, "offerIfLow s:" + s + "<=" + sizeMax);
-            }
         }
 
         if (success) {
